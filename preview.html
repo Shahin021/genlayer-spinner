@@ -24,6 +24,10 @@
   .seam{position:relative;display:grid;place-items:center;min-height:clamp(200px,32vw,300px);
         background:linear-gradient(90deg,var(--ceramic) 0 50%,var(--void) 50% 100%);
         border:1px solid var(--rule);margin-top:clamp(30px,5vw,52px)}
+  .seam-mark{position:relative;z-index:1}
+  .seam-mark .half{position:absolute;inset:0;pointer-events:none}
+  .seam-mark .half--l{clip-path:inset(0 50% 0 0)}
+  .seam-mark .half--r{clip-path:inset(0 0 0 50%)}
   .strips{margin-top:32px;display:grid;gap:2px}
   .strip{display:flex;align-items:flex-end;gap:clamp(18px,5vw,50px);flex-wrap:wrap;
          padding:clamp(20px,4vw,36px);border:1px solid var(--rule)}
@@ -47,7 +51,7 @@
     --gl-track:color-mix(in srgb, #070707 18%, #F5F5F5);
     width:24px;height:24px;display:block;
   }
-  [data-theme="dark"] .gl-spinner, .strip--dark .gl-spinner, .seam-dark .gl-spinner{
+  [data-theme="dark"] .gl-spinner, .strip--dark .gl-spinner, .half--r .gl-spinner{
     --gl-active:#5554FC;
     --gl-active:color-mix(in srgb, #110FFF 70%, #F5F5F5);
     --gl-track:#323232;
@@ -119,7 +123,12 @@
   <span class="eyebrow">Spinner</span>
   <h1>Quorum</h1>
   <p class="thesis">The mark, taking a vote. Each settled state resolves to a 3-of-5 majority — the smallest majority that decides anything.</p>
-  <div class="seam"><div class="slot" data-size="132" data-variant="universal"></div></div>
+  <div class="seam">
+    <div class="seam-mark" style="width:132px;height:132px">
+      <div class="half half--l"><div class="slot" data-size="132"></div></div>
+      <div class="half half--r"><div class="slot" data-size="132"></div></div>
+    </div>
+  </div>
   <div class="bar" style="border:0"><span class="eyebrow">One mark, both surfaces</span>
     <span class="eyebrow">Ceramic Node #F5F5F5 · Carbon Void #070707</span></div>
 </div>
