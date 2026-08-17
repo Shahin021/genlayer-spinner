@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Loading" focusable="false">
+  <title>Loading</title>
+  <style>
+    svg{
+      --gl-cycle:1.6s;
+      --gl-active:#110FFF;
+      --gl-track:#CACACA;
+      --gl-track:color-mix(in srgb, #070707 18%, #F5F5F5);
+    }
+    @media (prefers-color-scheme:dark){
+      svg{
+        --gl-active:#5554FC;
+        --gl-active:color-mix(in srgb, #110FFF 70%, #F5F5F5);
+        --gl-track:#323232;
+        --gl-track:color-mix(in srgb, #F5F5F5 18%, #070707);
+      }
+    }
+    .seat{ fill:var(--gl-track) }
+    .vote{
+      fill:var(--gl-active);
+      opacity:1;
+      animation:gl-vote var(--gl-cycle) ease-in-out infinite;
+      animation-delay:calc(-1 * var(--p));
+    }
+    .votes polygon:nth-child(1){ --p:0.96s }   /* upper left */
+    .votes polygon:nth-child(2){ --p:0.64s }   /* upper right */
+    .votes polygon:nth-child(3){ --p:1.28s }   /* lower left */
+    .votes polygon:nth-child(4){ --p:0.32s }   /* lower right */
+    .votes polygon:nth-child(5){ --p:0s }   /* core */
+
+    @keyframes gl-vote{
+      0%,11% { opacity:1 }
+      20%,31% { opacity:.6 }
+      40%,51% { opacity:.3 }
+      60%,91% { opacity:0 }
+      100% { opacity:1 }
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .votes polygon:nth-child(n){
+        animation:gl-hold calc(var(--gl-cycle) * 1.5) ease-in-out infinite;
+        animation-delay:0s;
+      }
+      @keyframes gl-hold{ 0%,100%{opacity:0} 50%{opacity:.85} }
+    }
+  </style>
+  <!-- Geometry traced from the official GenLayer mark: outer edges at dx/dy 0.482
+       (25.7 deg off vertical), the narrow vertical channel at the apex, the notch,
+       the tapered feet, the core kite. Each blade is divided once, perpendicular to
+       its axis, into two equal-area seats; with the core that makes five.
+       Nothing is rotated, scaled, stretched, morphed or recoloured. Opacity is the
+       only animated property. Five seats, three lit at any instant.
+       Colour: Kinetic Cobalt, Carbon Void and Ceramic Node only - every other value
+       here is a documented mix of those three. -->
+  <g aria-hidden="true">
+    <g class="seats">
+      <polygon class="seat" points="21.99,5.00 21.99,18.97 16.91,29.47 11.50,26.88"/>
+      <polygon class="seat" points="36.50,26.88 31.09,29.47 26.01,18.97 26.01,5.00"/>
+      <polygon class="seat" points="16.26,30.82 15.51,32.38 20.98,36.63 3.77,43.00 10.85,28.23"/>
+      <polygon class="seat" points="37.15,28.23 44.23,43.00 27.02,36.63 32.49,32.38 31.74,30.82"/>
+      <polygon class="seat" points="23.94,23.22 27.69,31.04 23.94,33.16 20.20,31.04"/>
+    </g>
+    <g class="votes">
+      <polygon class="vote" points="21.99,5.00 21.99,18.97 16.91,29.47 11.50,26.88"/>
+      <polygon class="vote" points="36.50,26.88 31.09,29.47 26.01,18.97 26.01,5.00"/>
+      <polygon class="vote" points="16.26,30.82 15.51,32.38 20.98,36.63 3.77,43.00 10.85,28.23"/>
+      <polygon class="vote" points="37.15,28.23 44.23,43.00 27.02,36.63 32.49,32.38 31.74,30.82"/>
+      <polygon class="vote" points="23.94,23.22 27.69,31.04 23.94,33.16 20.20,31.04"/>
+    </g>
+  </g>
+</svg>

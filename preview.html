@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GenLayer Portal spinner — preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --void:#070707; --ceramic:#F5F5F5; --cobalt:#110FFF;
+         --rule:#CACACA; --muted:#606060; --gutter:clamp(20px,5vw,64px) }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ceramic);color:var(--void);
+       font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.5}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 var(--gutter)}
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--muted)}
+  .bar{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+       padding:14px 0;border-bottom:1px solid var(--rule)}
+  h1{font-size:clamp(46px,11vw,110px);line-height:.92;letter-spacing:-.045em;margin:14px 0 0}
+  .thesis{font-size:clamp(17px,2.2vw,21px);max-width:38ch;margin:18px 0 0;color:#303030}
+  section{padding:clamp(40px,7vw,76px) 0;border-top:1px solid var(--rule)}
+  h2{font-size:clamp(22px,3.2vw,32px);letter-spacing:-.03em;margin:10px 0 0}
+  .lede{max-width:62ch;color:#303030;margin:14px 0 0}
+  .seam{position:relative;display:grid;place-items:center;min-height:clamp(200px,32vw,300px);
+        background:linear-gradient(90deg,#FFF 0 50%,var(--void) 50% 100%);
+        border:1px solid var(--rule);margin-top:clamp(30px,5vw,52px)}
+  .strips{margin-top:32px;display:grid;gap:2px}
+  .strip{display:flex;align-items:flex-end;gap:clamp(18px,5vw,50px);flex-wrap:wrap;
+         padding:clamp(20px,4vw,36px);border:1px solid var(--rule)}
+  .strip--dark{background:var(--void);border-color:#303030}
+  .strip--dark .eyebrow{color:#8A8A8A}
+  .rung{display:grid;gap:12px;justify-items:center}
+  .rung .eyebrow{font-size:10px}
+  .note{margin-top:14px}
+  footer{border-top:1px solid var(--rule);padding:24px 0 60px}
+
+  /* ---------------- spinner ---------------- */
+  .gl-spinner{
+    --gl-cycle:1.6s;
+    --gl-active:#110FFF;
+    --gl-track:#CACACA;
+    --gl-track:color-mix(in srgb, #070707 18%, #F5F5F5);
+    width:24px;height:24px;display:block;
+  }
+  [data-theme="dark"] .gl-spinner, .strip--dark .gl-spinner, .seam-dark .gl-spinner{
+    --gl-active:#5554FC;
+    --gl-active:color-mix(in srgb, #110FFF 70%, #F5F5F5);
+    --gl-track:#323232;
+    --gl-track:color-mix(in srgb, #F5F5F5 18%, #070707);
+  }
+  .gl-spinner .seat{ fill:var(--gl-track) }
+  .gl-spinner .vote{
+    fill:var(--gl-active);
+    opacity:1;
+    animation:gl-vote var(--gl-cycle) ease-in-out infinite;
+    animation-delay:calc(-1 * (var(--p) + var(--t, 0s)));
+  }
+  .gl-spinner .votes polygon:nth-child(1){ --p:0.96s }   /* upper left */
+  .gl-spinner .votes polygon:nth-child(2){ --p:0.64s }   /* upper right */
+  .gl-spinner .votes polygon:nth-child(3){ --p:1.28s }   /* lower left */
+  .gl-spinner .votes polygon:nth-child(4){ --p:0.32s }   /* lower right */
+  .gl-spinner .votes polygon:nth-child(5){ --p:0s }   /* core */
+  /* a frozen slot shows one real state of the same animation, not a redrawing of it */
+  .is-frozen .gl-spinner .vote{ animation-play-state:paused }
+
+  @keyframes gl-vote{
+    0%,11% { opacity:1 }
+    20%,31% { opacity:.6 }
+    40%,51% { opacity:.3 }
+    60%,91% { opacity:0 }
+    100% { opacity:1 }
+  }
+  @keyframes gl-hold{ 0%,100%{opacity:0} 50%{opacity:.85} }
+  @media (prefers-reduced-motion:reduce){
+    .gl-spinner .votes polygon:nth-child(n){
+      animation:gl-hold calc(var(--gl-cycle) * 1.5) ease-in-out infinite;
+      animation-delay:0s;
+    }
+  }
+</style>
+</head>
+<body>
+
+<template id="tpl">
+    <svg class="gl-spinner" viewBox="0 0 48 48" role="img" aria-label="Loading" focusable="false">
+      <g aria-hidden="true">
+        <g class="seats">
+          <polygon class="seat" points="21.99,5.00 21.99,18.97 16.91,29.47 11.50,26.88"/>
+          <polygon class="seat" points="36.50,26.88 31.09,29.47 26.01,18.97 26.01,5.00"/>
+          <polygon class="seat" points="16.26,30.82 15.51,32.38 20.98,36.63 3.77,43.00 10.85,28.23"/>
+          <polygon class="seat" points="37.15,28.23 44.23,43.00 27.02,36.63 32.49,32.38 31.74,30.82"/>
+          <polygon class="seat" points="23.94,23.22 27.69,31.04 23.94,33.16 20.20,31.04"/>
+        </g>
+        <g class="votes">
+          <polygon class="vote" points="21.99,5.00 21.99,18.97 16.91,29.47 11.50,26.88"/>
+          <polygon class="vote" points="36.50,26.88 31.09,29.47 26.01,18.97 26.01,5.00"/>
+          <polygon class="vote" points="16.26,30.82 15.51,32.38 20.98,36.63 3.77,43.00 10.85,28.23"/>
+          <polygon class="vote" points="37.15,28.23 44.23,43.00 27.02,36.63 32.49,32.38 31.74,30.82"/>
+          <polygon class="vote" points="23.94,23.22 27.69,31.04 23.94,33.16 20.20,31.04"/>
+        </g>
+      </g>
+    </svg>
+</template>
+
+<div class="wrap">
+  <div class="bar">
+    <span class="eyebrow">GenLayer Portal — loading state</span>
+    <span class="eyebrow">Every spinner on this page is the same SVG</span>
+  </div>
+</div>
+
+<div class="wrap" style="padding-top:clamp(44px,8vw,88px);padding-bottom:clamp(24px,4vw,40px)">
+  <span class="eyebrow">Spinner</span>
+  <h1>Quorum</h1>
+  <p class="thesis">The mark, taking a vote. Three of its five parts lit at any instant — the smallest majority that decides anything.</p>
+  <div class="seam"><div class="slot" data-size="132" data-variant="universal"></div></div>
+  <div class="bar" style="border:0"><span class="eyebrow">One mark, both surfaces</span>
+    <span class="eyebrow">Photon #FFFFFF · Carbon Void #070707</span></div>
+</div>
+
+<div class="wrap">
+  <section>
+    <span class="eyebrow">Legibility</span>
+    <h2>16 px up to 48 px, either surface</h2>
+    <p class="lede">The seat track sits under the votes, so all five parts are present in every frame and the
+      silhouette never changes. Nothing rotates, scales or moves.</p>
+    <div class="strips">
+      <div class="strip">
+        <div class="rung"><div class="slot" data-size="16"></div><span class="eyebrow">16</span></div>
+        <div class="rung"><div class="slot" data-size="20"></div><span class="eyebrow">20</span></div>
+        <div class="rung"><div class="slot" data-size="24"></div><span class="eyebrow">24</span></div>
+        <div class="rung"><div class="slot" data-size="32"></div><span class="eyebrow">32</span></div>
+        <div class="rung"><div class="slot" data-size="48"></div><span class="eyebrow">48</span></div>
+        <div class="rung" style="margin-left:auto"><span class="eyebrow">Ceramic Node</span></div>
+      </div>
+      <div class="strip strip--dark">
+        <div class="rung"><div class="slot" data-size="16" data-theme="dark"></div><span class="eyebrow">16</span></div>
+        <div class="rung"><div class="slot" data-size="20" data-theme="dark"></div><span class="eyebrow">20</span></div>
+        <div class="rung"><div class="slot" data-size="24" data-theme="dark"></div><span class="eyebrow">24</span></div>
+        <div class="rung"><div class="slot" data-size="32" data-theme="dark"></div><span class="eyebrow">32</span></div>
+        <div class="rung"><div class="slot" data-size="48" data-theme="dark"></div><span class="eyebrow">48</span></div>
+        <div class="rung" style="margin-left:auto"><span class="eyebrow">Carbon Void</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Motion</span>
+    <h2>Five real states, 320 ms apart</h2>
+    <p class="lede">These are not drawings of the animation. Each slot below runs the same animation with
+      <code>animation-play-state:paused</code> and a different phase offset, so it is literally one frame of
+      the live spinner. One seat joins, one leaves, three hold.</p>
+    <div class="strips">
+      <div class="strip">
+        <div class="rung"><div class="slot is-frozen" data-size="56" style="--t:0s"></div><span class="eyebrow">1</span></div>
+        <div class="rung"><div class="slot is-frozen" data-size="56" style="--t:0.32s"></div><span class="eyebrow">2</span></div>
+        <div class="rung"><div class="slot is-frozen" data-size="56" style="--t:0.64s"></div><span class="eyebrow">3</span></div>
+        <div class="rung"><div class="slot is-frozen" data-size="56" style="--t:0.96s"></div><span class="eyebrow">4</span></div>
+        <div class="rung"><div class="slot is-frozen" data-size="56" style="--t:1.28s"></div><span class="eyebrow">5</span></div>
+        <div class="rung" style="margin-left:auto"><span class="eyebrow">1.6s loop</span></div>
+      </div>
+    </div>
+    <p class="lede note">The five phases are exactly a fifth of a cycle apart, so no two seats ever hold the
+      same value and there is no frame where the mark flattens into one uniform state.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow">Colour</span>
+    <h2>Three official values, nothing else</h2>
+    <p class="lede">
+      Kinetic Cobalt at full strength measures 2.4:1 on Carbon Void, under the 3:1 floor for non-text
+      graphics, so the dark accent is Cobalt mixed 70/30 with Ceramic Node — #5554FC, 3.9:1. The seat track is
+      18% Carbon Void over Ceramic Node on light (#CACACA) and 18% Ceramic Node over Carbon Void on dark
+      (#323232). No fourth colour is introduced; each value is written as a
+      <code>color-mix()</code> of the official three, with a hex fallback.
+    </p>
+  </section>
+
+  <footer>
+    <span class="eyebrow">The official mark is unchanged and remains the primary brand mark. This is a
+      separate loading component built on its geometry.</span>
+  </footer>
+</div>
+
+<script>
+  const tpl = document.getElementById('tpl');
+  document.querySelectorAll('.slot').forEach(slot => {
+    const svg = tpl.content.querySelector('svg').cloneNode(true);
+    const size = slot.dataset.size || 24;
+    svg.style.width = size + 'px';
+    svg.style.height = size + 'px';
+    slot.appendChild(svg);
+  });
+</script>
+</body>
+</html>

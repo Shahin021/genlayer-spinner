@@ -1,0 +1,11 @@
+Quorum — a loading spinner for the Portal. One self-contained SVG (3.2 KB) animated in CSS: no JS, no runtime, no external assets. Use as <img> or inline, themed with two custom properties.
+
+Identity: I rasterised the official mark and traced it — outer edges at dx/dy 0.482 (25.7° off vertical), the narrow apex channel, the notch, the core kite. Each blade is split once, perpendicular to its axis, into two equal-area parts; with the core, five. Nothing is rotated, scaled, stretched or recoloured — the official mark remains the primary brand mark.
+
+Motion: five seats, three lit at any instant — quorum. Every 320 ms one joins, one leaves, three hold; 1.6 s seamless loop. Opacity is the only animated property.
+
+Colour: only Cobalt, Void and Ceramic Node; other values are a color-mix() of those three. The dark accent is 70/30 Cobalt/Ceramic, 3.9:1 on Void where full Cobalt is 2.4:1.
+
+role="img" + label, reduced-motion fallback, verified 16–48 px, light and dark.
+
+Source + live preview: <LINK>
