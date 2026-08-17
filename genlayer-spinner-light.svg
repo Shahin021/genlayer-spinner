@@ -4,16 +4,9 @@
     svg{
       --gl-cycle:1.6s;
       --gl-active:#110FFF;
+      --gl-active:#110FFF;
       --gl-track:#CACACA;
       --gl-track:color-mix(in srgb, #070707 18%, #F5F5F5);
-    }
-    @media (prefers-color-scheme:dark){
-      svg{
-        --gl-active:#5554FC;
-        --gl-active:color-mix(in srgb, #110FFF 70%, #F5F5F5);
-        --gl-track:#323232;
-        --gl-track:color-mix(in srgb, #F5F5F5 18%, #070707);
-      }
     }
     .seat{ fill:var(--gl-track) }
     .vote{
@@ -54,9 +47,8 @@
        to a 3-of-5 majority. Opacity is the only animated property.
        The official GenLayer mark asset is never modified or animated. This is a
        separate component derived from its geometry.
-       Colour follows prefers-color-scheme. Inline this file and override the
-       gl-active and gl-track custom properties to drive it from the Portal's
-       own theme instead. -->
+       Fixed light palette, no media query, so it renders the same inside an image
+       whatever theme the operating system is in. -->
   <g aria-hidden="true">
     <g class="seats">
       <polygon class="seat" points="21.99,5.00 21.99,18.97 16.91,29.47 11.50,26.88"/>

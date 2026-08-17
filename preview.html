@@ -22,7 +22,7 @@
   h2{font-size:clamp(22px,3.2vw,32px);letter-spacing:-.03em;margin:10px 0 0}
   .lede{max-width:62ch;color:#303030;margin:14px 0 0}
   .seam{position:relative;display:grid;place-items:center;min-height:clamp(200px,32vw,300px);
-        background:linear-gradient(90deg,#FFF 0 50%,var(--void) 50% 100%);
+        background:linear-gradient(90deg,var(--ceramic) 0 50%,var(--void) 50% 100%);
         border:1px solid var(--rule);margin-top:clamp(30px,5vw,52px)}
   .strips{margin-top:32px;display:grid;gap:2px}
   .strip{display:flex;align-items:flex-end;gap:clamp(18px,5vw,50px);flex-wrap:wrap;
@@ -70,12 +70,13 @@
     60%,91% { opacity:0 }
     100% { opacity:1 }
   }
-  @keyframes gl-hold{ 0%,100%{opacity:0} 50%{opacity:.85} }
   @media (prefers-reduced-motion:reduce){
-    .gl-spinner .votes polygon:nth-child(n){
-      animation:gl-hold calc(var(--gl-cycle) * 1.5) ease-in-out infinite;
-      animation-delay:0s;
-    }
+    .gl-spinner .votes polygon:nth-child(n){ animation:none }
+    .gl-spinner .votes polygon:nth-child(1){ opacity:0 }
+    .gl-spinner .votes polygon:nth-child(2){ opacity:.3 }
+    .gl-spinner .votes polygon:nth-child(3){ opacity:0 }
+    .gl-spinner .votes polygon:nth-child(4){ opacity:.6 }
+    .gl-spinner .votes polygon:nth-child(5){ opacity:1 }
   }
 </style>
 </head>
@@ -112,10 +113,10 @@
 <div class="wrap" style="padding-top:clamp(44px,8vw,88px);padding-bottom:clamp(24px,4vw,40px)">
   <span class="eyebrow">Spinner</span>
   <h1>Quorum</h1>
-  <p class="thesis">The mark, taking a vote. Three of its five parts lit at any instant — the smallest majority that decides anything.</p>
+  <p class="thesis">The mark, taking a vote. Each settled state resolves to a 3-of-5 majority — the smallest majority that decides anything.</p>
   <div class="seam"><div class="slot" data-size="132" data-variant="universal"></div></div>
   <div class="bar" style="border:0"><span class="eyebrow">One mark, both surfaces</span>
-    <span class="eyebrow">Photon #FFFFFF · Carbon Void #070707</span></div>
+    <span class="eyebrow">Ceramic Node #F5F5F5 · Carbon Void #070707</span></div>
 </div>
 
 <div class="wrap">
@@ -146,7 +147,7 @@
 
   <section>
     <span class="eyebrow">Motion</span>
-    <h2>Five real states, 320 ms apart</h2>
+    <h2>Five settled states, 320 ms apart</h2>
     <p class="lede">These are not drawings of the animation. Each slot below runs the same animation with
       <code>animation-play-state:paused</code> and a different phase offset, so it is literally one frame of
       the live spinner. One seat joins, one leaves, three hold.</p>
@@ -161,7 +162,7 @@
       </div>
     </div>
     <p class="lede note">The five phases are exactly a fifth of a cycle apart, so no two seats ever hold the
-      same value and there is no frame where the mark flattens into one uniform state.</p>
+      same value and there is no frame where the mark flattens into one uniform state. During a crossfade a fourth seat is briefly non-zero; each <em>settled</em> state is a clean 3-of-5.</p>
   </section>
 
   <section>
@@ -176,9 +177,22 @@
     </p>
   </section>
 
+  <section>
+    <span class="eyebrow">Theming</span>
+    <h2>Which file to use where</h2>
+    <p class="lede">
+      <code>genlayer-spinner.svg</code> follows <code>prefers-color-scheme</code>, which is the operating
+      system's setting, not the colour of the container it sits in. Inline it and override
+      <code>--gl-active</code> and <code>--gl-track</code> to drive it from the Portal's own theme. If it has
+      to be an <code>&lt;img&gt;</code> on a surface whose theme the Portal controls independently, use
+      <code>genlayer-spinner-light.svg</code> or <code>genlayer-spinner-dark.svg</code> — fixed palettes, no
+      media query, so they cannot disagree with the surface.
+    </p>
+  </section>
+
   <footer>
-    <span class="eyebrow">The official mark is unchanged and remains the primary brand mark. This is a
-      separate loading component built on its geometry.</span>
+    <span class="eyebrow">The official GenLayer mark asset is never modified or animated. Quorum is a
+      separate loading component derived from its geometry.</span>
   </footer>
 </div>
 

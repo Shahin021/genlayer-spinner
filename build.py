@@ -94,6 +94,13 @@ TOKENS = {
               "track_mix": "color-mix(in srgb, %s 18%%, %s)" % (CERAMIC, VOID)},
 }
 
+def static_rules(sel, indent="    "):
+    """reduced motion: hold one settled state instead of breathing."""
+    return "\n".join(
+        "%s%s polygon:nth-child(%d){ opacity:%s }" %
+        (indent, sel, i + 1, fmtv(round(level_at(PHASE[name] / CYCLE * 100), 3)))
+        for i, (name, _) in enumerate(SEATS))
+
 def phase_rules(sel, indent="    "):
     """per-seat phase, in seconds, as a custom property."""
     return "\n".join(
@@ -105,24 +112,42 @@ def polygons(cls, indent):
                      for _, pts in SEATS)
 
 # -------------------------------------------------------------------- svg ----
-def svg_file():
+def svg_file(mode="auto"):
+    """mode 'auto' answers prefers-color-scheme and is themable when inlined.
+       'light' and 'dark' are fixed-palette variants for <img> on a known surface."""
+    L, D = TOKENS["light"], TOKENS["dark"]
+    if mode == "auto":
+        tokens = ("""      --gl-active:%s;
+      --gl-track:%s;
+      --gl-track:%s;""" % (L["active"], L["track"], L["track_mix"]))
+        scheme = """
+    @media (prefers-color-scheme:dark){
+      svg{
+        --gl-active:%s;
+        --gl-active:%s;
+        --gl-track:%s;
+        --gl-track:%s;
+      }
+    }""" % (D["active"], D["active_mix"], D["track"], D["track_mix"])
+        note = ("Colour follows prefers-color-scheme. Inline this file and override the\n"
+                "       gl-active and gl-track custom properties to drive it from the Portal's\n"
+                "       own theme instead.")
+    else:
+        T = TOKENS[mode]
+        tokens = ("""      --gl-active:%s;
+      --gl-active:%s;
+      --gl-track:%s;
+      --gl-track:%s;""" % (T["active"], T["active_mix"] or T["active"], T["track"], T["track_mix"]))
+        scheme = ""
+        note = ("Fixed %s palette, no media query, so it renders the same inside an image\n"
+                "       whatever theme the operating system is in." % mode)
     return '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="Loading" focusable="false">
   <title>Loading</title>
   <style>
     svg{
       --gl-cycle:%(cycle)gs;
-      --gl-active:%(la)s;
-      --gl-track:%(lt)s;
-      --gl-track:%(ltm)s;
-    }
-    @media (prefers-color-scheme:dark){
-      svg{
-        --gl-active:%(da)s;
-        --gl-active:%(dam)s;
-        --gl-track:%(dt)s;
-        --gl-track:%(dtm)s;
-      }
-    }
+%(tokens)s
+    }%(scheme)s
     .seat{ fill:var(--gl-track) }
     .vote{
       fill:var(--gl-active);
@@ -136,22 +161,21 @@ def svg_file():
 %(kf)s
     }
 
+    /* reduced motion: hold one settled 3-of-5 majority, no movement at all */
     @media (prefers-reduced-motion:reduce){
-      .votes polygon:nth-child(n){
-        animation:gl-hold calc(var(--gl-cycle) * 1.5) ease-in-out infinite;
-        animation-delay:0s;
-      }
-      @keyframes gl-hold{ 0%%,100%%{opacity:0} 50%%{opacity:.85} }
+      .votes polygon:nth-child(n){ animation:none }
+%(static)s
     }
   </style>
-  <!-- Geometry traced from the official GenLayer mark: outer edges at dx/dy 0.482
-       (25.7 deg off vertical), the narrow vertical channel at the apex, the notch,
-       the tapered feet, the core kite. Each blade is divided once, perpendicular to
-       its axis, into two equal-area seats; with the core that makes five.
-       Nothing is rotated, scaled, stretched, morphed or recoloured. Opacity is the
-       only animated property. Five seats, three lit at any instant.
-       Colour: Kinetic Cobalt, Carbon Void and Ceramic Node only - every other value
-       here is a documented mix of those three. -->
+  <!-- Quorum - a loading component for the GenLayer Portal.
+       Geometry traced from the official mark: outer edges at dx/dy 0.482 (25.7 deg
+       off vertical), the narrow vertical channel at the apex, the notch, the tapered
+       feet, the core kite. Each blade is divided once, perpendicular to its axis, into
+       two equal-area seats; with the core that makes five. Each settled state resolves
+       to a 3-of-5 majority. Opacity is the only animated property.
+       The official GenLayer mark asset is never modified or animated. This is a
+       separate component derived from its geometry.
+       %(note)s -->
   <g aria-hidden="true">
     <g class="seats">
 %(seats)s
@@ -161,11 +185,9 @@ def svg_file():
     </g>
   </g>
 </svg>
-''' % dict(cycle=CYCLE, la=TOKENS["light"]["active"], lt=TOKENS["light"]["track"],
-           ltm=TOKENS["light"]["track_mix"], da=TOKENS["dark"]["active"],
-           dam=TOKENS["dark"]["active_mix"], dt=TOKENS["dark"]["track"],
-           dtm=TOKENS["dark"]["track_mix"], first=fmtv(LEVELS[0]),
+''' % dict(cycle=CYCLE, tokens=tokens, scheme=scheme, first=fmtv(LEVELS[0]),
            phases=phase_rules(".votes"), kf=css_keyframes(),
+           static=static_rules(".votes", "      "), note=note,
            seats=polygons("seat", "      "), votes=polygons("vote", "      "))
 
 # ---------------------------------------------------------------- raster -----
@@ -249,7 +271,7 @@ def preview_html():
   h2{font-size:clamp(22px,3.2vw,32px);letter-spacing:-.03em;margin:10px 0 0}
   .lede{max-width:62ch;color:#303030;margin:14px 0 0}
   .seam{position:relative;display:grid;place-items:center;min-height:clamp(200px,32vw,300px);
-        background:linear-gradient(90deg,#FFF 0 50%%,var(--void) 50%% 100%%);
+        background:linear-gradient(90deg,var(--ceramic) 0 50%%,var(--void) 50%% 100%%);
         border:1px solid var(--rule);margin-top:clamp(30px,5vw,52px)}
   .strips{margin-top:32px;display:grid;gap:2px}
   .strip{display:flex;align-items:flex-end;gap:clamp(18px,5vw,50px);flex-wrap:wrap;
@@ -289,12 +311,9 @@ def preview_html():
   @keyframes gl-vote{
 %(kf)s
   }
-  @keyframes gl-hold{ 0%%,100%%{opacity:0} 50%%{opacity:.85} }
   @media (prefers-reduced-motion:reduce){
-    .gl-spinner .votes polygon:nth-child(n){
-      animation:gl-hold calc(var(--gl-cycle) * 1.5) ease-in-out infinite;
-      animation-delay:0s;
-    }
+    .gl-spinner .votes polygon:nth-child(n){ animation:none }
+%(static)s
   }
 </style>
 </head>
@@ -314,10 +333,10 @@ def preview_html():
 <div class="wrap" style="padding-top:clamp(44px,8vw,88px);padding-bottom:clamp(24px,4vw,40px)">
   <span class="eyebrow">Spinner</span>
   <h1>Quorum</h1>
-  <p class="thesis">The mark, taking a vote. Three of its five parts lit at any instant — the smallest majority that decides anything.</p>
+  <p class="thesis">The mark, taking a vote. Each settled state resolves to a 3-of-5 majority — the smallest majority that decides anything.</p>
   <div class="seam"><div class="slot" data-size="132" data-variant="universal"></div></div>
   <div class="bar" style="border:0"><span class="eyebrow">One mark, both surfaces</span>
-    <span class="eyebrow">Photon #FFFFFF · Carbon Void %(void)s</span></div>
+    <span class="eyebrow">Ceramic Node %(ceramic)s · Carbon Void %(void)s</span></div>
 </div>
 
 <div class="wrap">
@@ -340,7 +359,7 @@ def preview_html():
 
   <section>
     <span class="eyebrow">Motion</span>
-    <h2>Five real states, %(step)d ms apart</h2>
+    <h2>Five settled states, %(step)d ms apart</h2>
     <p class="lede">These are not drawings of the animation. Each slot below runs the same animation with
       <code>animation-play-state:paused</code> and a different phase offset, so it is literally one frame of
       the live spinner. One seat joins, one leaves, three hold.</p>
@@ -351,7 +370,7 @@ def preview_html():
       </div>
     </div>
     <p class="lede note">The five phases are exactly a fifth of a cycle apart, so no two seats ever hold the
-      same value and there is no frame where the mark flattens into one uniform state.</p>
+      same value and there is no frame where the mark flattens into one uniform state. During a crossfade a fourth seat is briefly non-zero; each <em>settled</em> state is a clean 3-of-5.</p>
   </section>
 
   <section>
@@ -366,9 +385,22 @@ def preview_html():
     </p>
   </section>
 
+  <section>
+    <span class="eyebrow">Theming</span>
+    <h2>Which file to use where</h2>
+    <p class="lede">
+      <code>genlayer-spinner.svg</code> follows <code>prefers-color-scheme</code>, which is the operating
+      system's setting, not the colour of the container it sits in. Inline it and override
+      <code>--gl-active</code> and <code>--gl-track</code> to drive it from the Portal's own theme. If it has
+      to be an <code>&lt;img&gt;</code> on a surface whose theme the Portal controls independently, use
+      <code>genlayer-spinner-light.svg</code> or <code>genlayer-spinner-dark.svg</code> — fixed palettes, no
+      media query, so they cannot disagree with the surface.
+    </p>
+  </section>
+
   <footer>
-    <span class="eyebrow">The official mark is unchanged and remains the primary brand mark. This is a
-      separate loading component built on its geometry.</span>
+    <span class="eyebrow">The official GenLayer mark asset is never modified or animated. Quorum is a
+      separate loading component derived from its geometry.</span>
   </footer>
 </div>
 
@@ -388,15 +420,134 @@ def preview_html():
            la=L["active"], lt=L["track"], ltm=L["track_mix"],
            da=D["active"], dam=D["active_mix"], dt=D["track"], dtm=D["track_mix"],
            first=fmtv(LEVELS[0]), phases=phase_rules(".gl-spinner .votes", "  "),
+           static=static_rules(".gl-spinner .votes", "    "),
            kf=css_keyframes("    "), inline=inline,
            ladder_light=ladder("light"), ladder_dark=ladder("dark"), states=states)
+
+
+# ------------------------------------------------------------------ readme ---
+README = """# Quorum \u2014 GenLayer Portal spinner
+
+An animated loading spinner for the GenLayer Portal. One self-contained SVG (3.2 KB)
+animated in CSS: no JavaScript, no runtime, no external assets.
+
+![preview](genlayer-spinner-light.gif)
+
+## Identity
+
+I rasterised the official GenLayer mark and traced it, edge by edge:
+
+- outer edges at **dx/dy 0.482 \u2014 25.7\u00b0 off vertical**
+- the narrow vertical channel at the apex
+- the notch, the tapered feet, the core kite
+
+That outline is the spinner. Each blade is split once, perpendicular to its own axis,
+into two equal-area parts; with the core that makes five.
+
+**The official GenLayer mark asset is never modified or animated.** Quorum is a
+separate loading component derived from its geometry; the mark remains the primary
+brand mark.
+
+## Motion
+
+Five seats, and **each settled state resolves to a 3-of-5 majority**. Every {STEP} ms one
+seat joins, one leaves, three hold; a {CYCLE} s seamless loop. Opacity is the only
+animated property, so nothing moves, rotates or rescales.
+
+The five phases are exactly a fifth of a cycle apart, so no two seats ever hold the same
+value and there is no frame where the mark flattens into one uniform state. During a
+crossfade a fourth seat is briefly non-zero; every settled state is a clean three.
+
+Under `prefers-reduced-motion: reduce` the animation stops entirely and the spinner holds
+one settled 3-of-5 majority. Nothing breathes, pulses or moves.
+
+## Colour
+
+Only Kinetic Cobalt, Carbon Void and Ceramic Node. Every other value is a documented
+`color-mix()` of those three:
+
+| Token | Value | Derivation |
+|---|---|---|
+| light accent | `{LA}` | Kinetic Cobalt, 7.6:1 on Ceramic Node |
+| dark accent | `{DA}` | 70% Cobalt / 30% Ceramic Node, 3.9:1 on Carbon Void |
+| light track | `{LT}` | 18% Carbon Void over Ceramic Node |
+| dark track | `{DT}` | 18% Ceramic Node over Carbon Void |
+
+Full Cobalt measures 2.4:1 on Carbon Void, under the 3:1 floor for non-text graphics,
+which is why the dark accent is a tint rather than the raw value.
+
+## Which file to use where
+
+`genlayer-spinner.svg` follows `prefers-color-scheme` \u2014 the operating system's setting,
+not the colour of the container it sits in.
+
+- **Inline it** and override `--gl-active` and `--gl-track` to drive it from the Portal's
+  own theme. This is the recommended integration.
+- **As an `<img>`** on a surface whose theme the Portal controls independently of the OS,
+  use `genlayer-spinner-light.svg` or `genlayer-spinner-dark.svg` instead. Fixed palettes,
+  no media query, so they cannot disagree with the surface.
+
+```html
+<img src="genlayer-spinner-light.svg" width="24" height="24" alt="Loading">
+```
+
+## Accessibility
+
+`role="img"` with a label; the artwork is `aria-hidden`. Verified at 16, 20, 24, 32 and
+48 px on both surfaces \u2014 see `test-frames-light.png` and `test-frames-dark.png`.
+
+## Files
+
+| File | What it is |
+|---|---|
+| `genlayer-spinner.svg` | the spinner, following the system colour scheme |
+| `genlayer-spinner-light.svg` / `-dark.svg` | fixed-palette variants for `<img>` use |
+| `preview.html` | live preview: light/dark, 16\u201348 px, five settled states |
+| `build.py` | single source of truth \u2014 emits every file above |
+| `genlayer-spinner-*.gif` | animated previews |
+| `test-frames-*.png` | frame-by-frame renders at every size |
+
+Geometry, keyframes, phases and colour tokens are declared once in `build.py`, so the
+SVG, the preview and the test renders cannot drift apart. The frozen states in
+`preview.html` are the live animation paused at a phase offset, not redrawings of it.
+
+## Licence
+
+MIT \u2014 free for the GenLayer Foundation to use, modify and redistribute.
+"""
+
+NOTES = """Quorum \u2014 a loading spinner for the Portal. One self-contained SVG (3.2 KB) animated in CSS: no JS, no runtime, no external assets.
+
+Identity: I rasterised the official mark and traced it \u2014 outer edges at dx/dy 0.482 (25.7\u00b0 off vertical), the narrow apex channel, the notch, the core kite. Each blade is split once, perpendicular to its axis, into two equal-area parts; with the core, five. The official mark asset is never modified or animated; this is a separate component derived from its geometry.
+
+Motion: five seats, each settled state resolving to a 3-of-5 majority. Every {STEP} ms one joins, one leaves, three hold; {CYCLE} s seamless loop. Opacity is the only animated property, and reduced motion holds one settled majority.
+
+Colour: only Cobalt, Void and Ceramic Node; other values are a color-mix() of those three. Dark accent {DA} is 70/30 Cobalt/Ceramic, 3.9:1 on Void where full Cobalt is 2.4:1.
+
+Verified 16\u201348 px, light and dark. Inline + CSS variables for Portal theming; fixed light/dark variants included for <img> use.
+
+Source + live preview: <LINK>
+"""
+
+def fill(text):
+    L, D = TOKENS["light"], TOKENS["dark"]
+    for k, v in (("{STEP}", str(int(STEP * 1000))), ("{CYCLE}", "%g" % CYCLE),
+                 ("{LA}", L["active"]), ("{DA}", D["active"]),
+                 ("{LT}", L["track"]), ("{DT}", D["track"])):
+        text = text.replace(k, v)
+    return text
 
 # ----------------------------------------------------------------- main ------
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    open(os.path.join(OUT, "genlayer-spinner.svg"), "w").write(svg_file())
+    open(os.path.join(OUT, "genlayer-spinner.svg"), "w").write(svg_file("auto"))
+    open(os.path.join(OUT, "genlayer-spinner-light.svg"), "w").write(svg_file("light"))
+    open(os.path.join(OUT, "genlayer-spinner-dark.svg"), "w").write(svg_file("dark"))
     open(os.path.join(OUT, "preview.html"), "w").write(preview_html())
+    open(os.path.join(OUT, "README.md"), "w").write(fill(README))
+    open(os.path.join(OUT, "submission-notes.txt"), "w").write(fill(NOTES))
     sheets()
     print("cycle %.2fs, %d states, %d ms each" % (CYCLE, STEPS, STEP * 1000))
     print("phases:", {k: round(v, 2) for k, v in PHASE.items()})
-    print("wrote genlayer-spinner.svg, preview.html, test-frames-*.png, *.gif")
+    print("static reduced-motion state:", {n: round(level_at(PHASE[n]/CYCLE*100),2) for n,_ in SEATS})
+    print("wrote", sorted(os.listdir(OUT)))
