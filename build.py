@@ -282,6 +282,11 @@ def preview_html():
   .rung .eyebrow{font-size:10px}
   .note{margin-top:14px}
   footer{border-top:1px solid var(--rule);padding:24px 0 60px}
+  .dl{display:flex;gap:2px;flex-wrap:wrap;margin-top:26px}
+  .dl a{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.02em;
+        text-decoration:none;color:var(--void);border:1px solid var(--rule);
+        padding:12px 16px;transition:background .15s,border-color .15s}
+  .dl a:hover{background:var(--cobalt);border-color:var(--cobalt);color:#FFF}
 
   /* ---------------- spinner ---------------- */
   .gl-spinner{
@@ -371,6 +376,8 @@ def preview_html():
     </div>
     <p class="lede note">The five phases are exactly a fifth of a cycle apart, so no two seats ever hold the
       same value and there is no frame where the mark flattens into one uniform state. During a crossfade a fourth seat is briefly non-zero; each <em>settled</em> state is a clean 3-of-5.</p>
+    <p class="lede note">Under <code>prefers-reduced-motion: reduce</code> the animation stops entirely and the
+      spinner holds one settled 3-of-5 majority. Nothing breathes, pulses or moves.</p>
   </section>
 
   <section>
@@ -395,6 +402,11 @@ def preview_html():
       to be an <code>&lt;img&gt;</code> on a surface whose theme the Portal controls independently, use
       <code>genlayer-spinner-light.svg</code> or <code>genlayer-spinner-dark.svg</code> — fixed palettes, no
       media query, so they cannot disagree with the surface.
+    </p>
+    <p class="dl">
+      <a href="genlayer-spinner.svg" download>genlayer-spinner.svg</a>
+      <a href="genlayer-spinner-light.svg" download>genlayer-spinner-light.svg</a>
+      <a href="genlayer-spinner-dark.svg" download>genlayer-spinner-dark.svg</a>
     </p>
   </section>
 
